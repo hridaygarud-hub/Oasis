@@ -1,0 +1,6 @@
+node_modules/
+.env
+credentials.json
+*.db
+__pycache__/
+*.log
