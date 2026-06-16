@@ -1,0 +1,17 @@
+{
+  "name": "Oasis Mental Wellness",
+  "short_name": "Oasis",
+  "description": "A premium mental wellness platform with personalized AI insights.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#8b5cf6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/pwa-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
