@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Oasis Summary</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#8b5cf6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: white;
+            text-align: center;
+        }
+
+        .spline-bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        .spline-bg-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        h2 {
+            margin-top: 30px;
+            font-size: 32px;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .title {
+            font-size: 18px;
+            opacity: 0.7;
+        }
+
+        .value {
+            font-size: 24px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background: white;
+            color: black;
+            padding: 30px;
+            border-radius: 10px;
+            width: 300px;
+        }
+
+        .close {
+            margin-top: 15px;
+            padding: 8px 15px;
+            background: black;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-sidebar {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 100;
+        }
+
+        .nav-item {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(139, 92, 246, 0.3);
+            border-color: rgba(139, 92, 246, 0.5);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .nav-tooltip {
+            position: absolute;
+            left: 60px;
+            background: rgba(139, 92, 246, 0.9);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-item:hover .nav-tooltip {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="spline-bg-container">
+        <iframe src='https://my.spline.design/ailandingpagewebdesign3danimation-8hFNuj0gbBXM1uPdCf3aRUnZ/'
+            frameborder='0' width='100%' height='100%'></iframe>
+    </div>
+
+    <div class="nav-sidebar">
+        <a href="/" class="nav-item">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+                </path>
+            </svg>
+            <span class="nav-tooltip">Home</span>
+        </a>
+        <a href="/activities" class="nav-item active">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                </path>
+            </svg>
+            <span class="nav-tooltip">Activities</span>
+        </a>
+        <a href="/oasis-watch" class="nav-item">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                </path>
+            </svg>
+            <span class="nav-tooltip">Oasis Watch</span>
+        </a>
+        <a href="/chatbot" class="nav-item">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
+                </path>
+            </svg>
+            <span class="nav-tooltip">Chatbot</span>
+        </a>
+        
+        <a href="/settings" class="nav-item">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span class="nav-tooltip">Settings</span>
+        </a>
+    </div>
+
+    <h2>Your Activity Summary</h2>
+
+    <div class="container">
+
+        <div class="card" onclick="showInfo('best')">
+            <div class="title">Favourite Activity</div>
+            <div class="value">{{best}}</div>
+        </div>
+
+        <div class="card" onclick="showInfo('least')">
+            <div class="title">Try This</div>
+            <div class="value">{{least}}</div>
+        </div>
+
+        <div class="card" onclick="showInfo('user_type')">
+            <div class="title">User Type</div>
+            <div class="value">{{user_type}}</div>
+        </div>
+
+        <div class="card" onclick="showInfo('next')">
+            <div class="title">Next Suggestion</div>
+            <div class="value">{{next_rec}}</div>
+        </div>
+
+        <div class="card" onclick="showInfo('time')">
+            <div class="title">Time Preference</div>
+            <div class="value">{{time_pref}}</div>
+        </div>
+
+        <div class="card" onclick="showInfo('score')">
+            <div class="title">Score</div>
+            <div class="value">{{score}}</div>
+        </div>
+
+        <div class="card" onclick="showInfo('streak')">
+            <div class="title">Streak</div>
+            <div class="value">{{streak}} days</div>
+        </div>
+
+        <div class="card" onclick="showInfo('mental')">
+            <div class="title">Mental State</div>
+            <div class="value">{{mental}}</div>
+        </div>
+
+    </div>
+
+    <h2>Interactive Wellness Sessions</h2>
+
+    <div class="container" style="max-width: 900px; margin: 0 auto 50px auto; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+        <div class="card" onclick="window.location.href='/yoga'" style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); text-align: left; padding: 25px;">
+            <div class="title" style="color: #22d3ee; opacity: 1; font-weight: 700; font-size: 1.25rem;">🧘‍♀️ Yoga Pose Recognition</div>
+            <div class="value" style="font-size: 0.95rem; font-weight: normal; margin-top: 10px; opacity: 0.85; line-height: 1.5; text-align: left;">
+                Perfect your postures in real-time with MoveNet pose-detection. Stand back and track standard poses like T Pose, Tree Pose, and Forward Bend dynamically.
+            </div>
+        </div>
+
+        <div class="card" onclick="window.location.href='/meditation'" style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); text-align: left; padding: 25px;">
+            <div class="title" style="color: #c084fc; opacity: 1; font-weight: 700; font-size: 1.25rem;">🌬 Mindful Breathing & Meditation</div>
+            <div class="value" style="font-size: 0.95rem; font-weight: normal; margin-top: 10px; opacity: 0.85; line-height: 1.5; text-align: left;">
+                Regulate your body and mind with box breathing. Align your breathing to a gorgeous glassmorphic ambient bubble featuring custom timing intervals.
+            </div>
+        </div>
+    </div>
+
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <div id="popup-text"></div>
+            <button class="close" onclick="closePopup()">Close</button>
+        </div>
+    </div>
+
+    <script>
+
+        function showInfo(type) {
+
+            let text = "";
+
+            if (type === "best") {
+                text = "This is the feature you use the most. The app prioritizes it for you.";
+            }
+
+            else if (type === "least") {
+                text = "You rarely use this feature. Try exploring it for better balance.";
+            }
+
+            else if (type === "user_type") {
+                text = "This is your personality type based on your behavior in the app. " + "Self Reflective means that you constantly look back upon yourself and strive to improve. " + "Balanced means that you have a good mix of productive and distracting activities. " + "Stress Reliever means that you use the app mostly for stress relief and relaxation. " + "Organized Learner means that planning your day is your main focus. " + "Talkative Socializer means that you really enjoy expressing yourself to others. ";
+            }
+
+            else if (type === "next") {
+                text = "This is what you are most likely to do next based on your past actions.";
+            }
+
+            else if (type === "time") {
+                text = "This shows when you usually use the app (morning, afternoon, night).";
+            }
+
+            else if (type === "score") {
+                text = "Your engagement score based on productive vs distracting activities.";
+            }
+
+            else if (type === "streak") {
+                text = "Number of consecutive days you have used the app.";
+            }
+
+            else if (type === "mental") {
+                text = "Estimated mental state based on your activity patterns.";
+            }
+
+            document.getElementById("popup-text").innerText = text;
+            document.getElementById("popup").style.display = "flex";
+        }
+
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+        }
+
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker registered', (typeof reg !== 'undefined' ? reg : 'unknown')))
+                    .catch(err => console.log('Service Worker registration failed', err));
+            });
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Oasis · Yoga Pose Detector</title>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at center, #1b263b 0%, #0d1b2a 100%);
+      color: #f1f5f9;
+      font-family: 'Outfit', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 100px 30px 40px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+
+    .bg-glow {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, rgba(139, 92, 246, 0.03) 50%, rgba(0, 0, 0, 0) 100%);
+      pointer-events: none;
+      z-index: 0;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+
+    .header {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      right: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .back-btn {
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+      font-weight: 500;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .back-btn:hover {
+      background: rgba(6, 182, 212, 0.2);
+      border-color: rgba(6, 182, 212, 0.4);
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    #title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #06b6d4 0%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 4px 20px rgba(6, 182, 212, 0.15);
+    }
+
+
+    #status {
+      padding: 12px 24px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      text-align: center;
+      letter-spacing: 0.5px;
+      color: #06b6d4;
+      text-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+      width: 100%;
+      max-width: 1040px;
+      z-index: 2;
+    }
+
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 30px;
+      width: 100%;
+      max-width: 1040px;
+      z-index: 2;
+    }
+
+    @media (min-width: 900px) {
+      .dashboard-grid {
+        grid-template-columns: 640px 1fr;
+      }
+    }
+
+
+    .camera-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    #cameraContainer {
+      position: relative;
+      width: 640px;
+      height: 480px;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4), 0 0 30px rgba(6, 182, 212, 0.05);
+      background: #090e17;
+    }
+
+    video, canvas {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 640px;
+      height: 480px;
+      border-radius: 24px;
+    }
+
+
+    #video {
+      transform: scaleX(-1);
+      opacity: 0.2;
+      filter: blur(4px);
+    }
+
+    #canvas {
+      z-index: 2;
+      transform: scaleX(-1);
+    }
+
+
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 8px;
+    }
+
+
+    #timerContainer {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    #timerText {
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: white;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    .timer-controls {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      align-items: center;
+    }
+
+    input[type="number"] {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 10px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      width: 80px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    input[type="number"]:focus {
+      border-color: #06b6d4;
+      background: rgba(6, 182, 212, 0.1);
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+      color: white;
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.2);
+    }
+
+    .btn-start:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(6, 182, 212, 0.4);
+    }
+
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.05);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-reset:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+
+
+    #poseList {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 250px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    #poseList::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #poseList::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .pose-item {
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #94a3b8;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pose-item::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #475569;
+      margin-right: 12px;
+      display: inline-block;
+      transition: all 0.3s;
+    }
+
+    .pose-item.active {
+      color: #06b6d4;
+      background: rgba(6, 182, 212, 0.08);
+      border-color: rgba(6, 182, 212, 0.3);
+      text-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+    }
+
+    .pose-item.active::before {
+      background: #06b6d4;
+      box-shadow: 0 0 10px #06b6d4;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg-glow"></div>
+
+  <div class="header">
+    <a href="/" class="back-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M19 12H5M12 19l-7-7 7-7"/>
+      </svg>
+      Back to Oasis
+    </a>
+    <div id="title">Oasis Yoga Tracker</div>
+  </div>
+
+  <div id="status">Loading AI model...</div>
+
+  <div class="dashboard-grid">
+
+    <div class="camera-panel">
+      <div id="cameraContainer">
+
+        <video id="video" width="640" height="480" autoplay playsinline></video>
+
+        <canvas id="canvas" width="640" height="480"></canvas>
+      </div>
+    </div>
+
+    <div class="side-panel">
+      
+      <div class="glass-card">
+        <div class="panel-title">Session Timer</div>
+        <div id="timerContainer">
+          <div id="timerText">00:00</div>
+          <div class="timer-controls">
+            <input type="number" id="minutesInput" placeholder="Min" min="1" value="5">
+            <button class="btn-start" onclick="startTimer()">Start</button>
+            <button class="btn-reset" onclick="resetTimer()">Reset</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card">
+        <div class="panel-title">Standard Poses</div>
+        <div id="poseList">
+          <div class="pose-item">Hands Up</div>
+          <div class="pose-item">T Pose</div>
+          <div class="pose-item">Tree Pose</div>
+          <div class="pose-item">Chair Pose</div>
+          <div class="pose-item">Forward Bend</div>
+          <div class="pose-item">Warrior Pose</div>
+          <div class="pose-item">Mountain Pose</div>
+          <div class="pose-item">Star Pose</div>
+          <div class="pose-item">Standing Split</div>
+          <div class="pose-item">Relaxed Pose</div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const status = document.getElementById("status");
+
+    let detector;
+
+
+    async function setupCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        return new Promise(resolve => {
+          video.onloadedmetadata = () => resolve(video);
+        });
+      } catch (err) {
+        status.innerText = "Camera access denied. Please allow camera permissions.";
+        console.error(err);
+      }
+    }
+
+
+    async function loadModel() {
+      await tf.setBackend("webgl");
+      await tf.ready();
+
+      detector = await poseDetection.createDetector(
+        poseDetection.SupportedModels.MoveNet,
+        {
+          modelType: poseDetection.movenet.modelType.SINGLEPOSE_LIGHTNING
+        }
+      );
+
+      status.innerText = "Model loaded. Strike a pose!";
+    }
+
+
+    function get(kp, name) {
+      return kp.find(p => p.name === name);
+    }
+
+
+    function detectPose(kp) {
+      const lw = get(kp,"left_wrist");
+      const rw = get(kp,"right_wrist");
+      const ls = get(kp,"left_shoulder");
+      const rs = get(kp,"right_shoulder");
+      const nose = get(kp,"nose");
+      const la = get(kp,"left_ankle");
+      const ra = get(kp,"right_ankle");
+
+      if (!lw || !rw || !ls || !rs || !nose || !la || !ra) return "Detecting";
+
+
+      if (lw.y < nose.y && rw.y < nose.y) return "Hands Up";
+      if (Math.abs(lw.y-ls.y)<40 && Math.abs(rw.y-rs.y)<40) return "T Pose";
+      if (Math.abs(la.y-rs.y)<60 || Math.abs(ra.y-ls.y)<60) return "Tree Pose";
+      if (nose.y > ls.y) return "Forward Bend";
+
+      return "Active Practice";
+    }
+
+
+    function drawLine(p1, p2) {
+      if (p1 && p2 && p1.score > 0.4 && p2.score > 0.4) {
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = "rgba(6, 182, 212, 0.45)";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+    }
+
+
+    function draw(kp) {
+      ctx.clearRect(0,0,640,480);
+
+
+      drawLine(get(kp,"left_shoulder"), get(kp,"right_shoulder"));
+      drawLine(get(kp,"left_shoulder"), get(kp,"left_elbow"));
+      drawLine(get(kp,"left_elbow"), get(kp,"left_wrist"));
+      drawLine(get(kp,"right_shoulder"), get(kp,"right_elbow"));
+      drawLine(get(kp,"right_elbow"), get(kp,"right_wrist"));
+      drawLine(get(kp,"left_shoulder"), get(kp,"left_hip"));
+      drawLine(get(kp,"right_shoulder"), get(kp,"right_hip"));
+      drawLine(get(kp,"left_hip"), get(kp,"right_hip"));
+      drawLine(get(kp,"left_hip"), get(kp,"left_knee"));
+      drawLine(get(kp,"left_knee"), get(kp,"left_ankle"));
+      drawLine(get(kp,"right_hip"), get(kp,"right_knee"));
+      drawLine(get(kp,"right_knee"), get(kp,"right_ankle"));
+
+
+      kp.forEach(p => {
+        if (p.score > 0.4) {
+          ctx.beginPath();
+          ctx.arc(p.x,p.y,8,0,Math.PI*2);
+          ctx.fillStyle="rgba(6, 182, 212, 0.25)";
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(p.x,p.y,4,0,Math.PI*2);
+          ctx.fillStyle="#06b6d4";
+          ctx.fill();
+        }
+      });
+    }
+
+
+    async function run() {
+      await setupCamera();
+      video.play();
+
+      await loadModel();
+
+      async function loop() {
+        if (detector) {
+          const poses = await detector.estimatePoses(video);
+
+          if (poses.length) {
+            const kp = poses[0].keypoints;
+            draw(kp);
+
+            const activePose = detectPose(kp);
+            status.innerText = `Pose Detected: ${activePose}`;
+
+
+            document.querySelectorAll(".pose-item").forEach(item => {
+              if (item.innerText.toLowerCase() === activePose.toLowerCase()) {
+                item.classList.add("active");
+              } else {
+                item.classList.remove("active");
+              }
+            });
+          }
+        }
+        requestAnimationFrame(loop);
+      }
+
+      loop();
+    }
+
+    run();
+
+
+    let timer, total=0, left=0;
+
+    function startTimer() {
+      clearInterval(timer);
+
+      const m = parseInt(document.getElementById("minutesInput").value);
+      if (!m) return;
+
+      total = m * 60;
+      left = total;
+
+      timer = setInterval(() => {
+        left--;
+
+        let min = Math.floor(left/60);
+        let sec = left%60;
+
+        document.getElementById("timerText").innerText =
+          String(min).padStart(2,"0")+":"+String(sec).padStart(2,"0");
+
+        if (left <= 0) {
+          clearInterval(timer);
+          document.getElementById("timerText").innerText = "DONE";
+          
+
+          const userId = localStorage.getItem("oasis_user_id") || "Explorer";
+          fetch("/api/game/progress", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user_id: userId,
+              mission_id: "grounding",
+              points: 35,
+              mood: "calm",
+              note: "Completed Yoga Pose recognition exercise."
+            })
+          }).catch(console.error);
+        }
+      },1000);
+    }
+
+    function resetTimer() {
+      clearInterval(timer);
+      document.getElementById("timerText").innerText = "00:00";
+    }
+  </script>
+</body>
+</html>

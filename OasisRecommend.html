@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oasis · For You</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #1a1a2e;
+      --s1: rgba(255, 255, 255, 0.08);
+      --s2: rgba(255, 255, 255, 0.05);
+      --b: rgba(255, 255, 255, 0.15);
+      --a1: #a78bfa;
+      --a2: #8b5cf6;
+      --a3: #c4b5fd;
+      --a4: #f6ad55;
+      --a5: #fc8181;
+      --t: #ffffff;
+      --m: rgba(255, 255, 255, 0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: radial-gradient(circle, #3a2e5d, #1a1a2e);
+      color: var(--t);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0
+    }
+
+    .o1 {
+      width: 500px;
+      height: 500px;
+      background: rgba(139, 92, 246, .15);
+      top: -150px;
+      left: -100px
+    }
+
+    .o2 {
+      width: 400px;
+      height: 400px;
+      background: rgba(167, 139, 250, .10);
+      bottom: -100px;
+      right: -100px
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: flex;
+      flex-direction: column
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      flex-shrink: 0
+    }
+
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--a3)
+    }
+
+    .topbar-right {
+      display: flex;
+      gap: 10px;
+      align-items: center
+    }
+
+    .pill {
+      padding: 5px 14px;
+      border-radius: 99px;
+      font-size: .75rem;
+      font-weight: 600;
+      border: 1px solid var(--b);
+      background: var(--s1);
+      color: var(--m);
+      cursor: pointer;
+      transition: .2s
+    }
+
+    .pill:hover,
+    .pill.active {
+      border-color: var(--a2);
+      color: var(--a1)
+    }
+
+    .state-bar {
+      margin: 0 24px 14px;
+      padding: 12px 18px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      border-radius: 14px;
+      font-size: .82rem;
+      color: var(--m);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0
+    }
+
+    .state-bar .icon {
+      font-size: 1rem
+    }
+
+    #state-text {
+      flex: 1
+    }
+
+    .safety-banner {
+      margin: 0 24px 14px;
+      padding: 14px 18px;
+      background: rgba(252, 129, 129, .08);
+      border: 1px solid rgba(252, 129, 129, .3);
+      border-radius: 14px;
+      display: none;
+      flex-shrink: 0
+    }
+
+    .safety-banner .safety-title {
+      font-size: .85rem;
+      font-weight: 700;
+      color: var(--a5);
+      margin-bottom: 6px
+    }
+
+    .safety-banner p {
+      font-size: .78rem;
+      color: var(--t);
+      line-height: 1.5
+    }
+
+    .safety-links {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap
+    }
+
+    .safety-link {
+      padding: 5px 14px;
+      border-radius: 8px;
+      font-size: .75rem;
+      font-weight: 600;
+      background: rgba(252, 129, 129, .15);
+      color: var(--a5);
+      text-decoration: none;
+      border: 1px solid rgba(252, 129, 129, .3)
+    }
+
+    .feed {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      padding: 0 24px
+    }
+
+    .card-stack {
+      position: relative;
+      width: 100%;
+      max-width: 480px;
+      height: 340px
+    }
+
+    .rec-card {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 24px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      cursor: grab;
+      user-select: none;
+      transition: transform .4s cubic-bezier(.23, 1, .32, 1), opacity .4s;
+      will-change: transform;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2)
+    }
+
+    .rec-card.behind1 {
+      transform: scale(.96) translateY(12px);
+      opacity: .7;
+      z-index: 1;
+      pointer-events: none
+    }
+
+    .rec-card.behind2 {
+      transform: scale(.92) translateY(24px);
+      opacity: .4;
+      z-index: 0;
+      pointer-events: none
+    }
+
+    .rec-card.front {
+      z-index: 2
+    }
+
+    .rec-card.swiped-right {
+      transform: translateX(130%) rotate(12deg) !important;
+      opacity: 0
+    }
+
+    .rec-card.swiped-left {
+      transform: translateX(-130%) rotate(-12deg) !important;
+      opacity: 0
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 14px
+    }
+
+    .card-emoji {
+      font-size: 2.8rem;
+      line-height: 1
+    }
+
+    .score-badge {
+      background: rgba(139, 92, 246, .2);
+      border: 1px solid rgba(167, 139, 250, .4);
+      border-radius: 10px;
+      padding: 4px 10px;
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--a3)
+    }
+
+    .card-name {
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+      letter-spacing: -.3px
+    }
+
+    .card-desc {
+      font-size: .83rem;
+      color: var(--m);
+      line-height: 1.5;
+      margin-bottom: 14px
+    }
+
+    .why-box {
+      background: rgba(139, 92, 246, 0.12);
+      border-radius: 12px;
+      padding: 11px 14px;
+      margin-bottom: 14px;
+      border-left: 3px solid var(--a2)
+    }
+
+    .why-label {
+      font-size: .65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--a3);
+      margin-bottom: 4px
+    }
+
+    .why-text {
+      font-size: .78rem;
+      color: var(--t);
+      line-height: 1.5
+    }
+
+    .future-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .delta-chip {
+      padding: 3px 10px;
+      border-radius: 8px;
+      font-size: .7rem;
+      font-weight: 600
+    }
+
+    .delta-pos {
+      background: rgba(104, 211, 145, .1);
+      color: var(--a3);
+      border: 1px solid rgba(104, 211, 145, .2)
+    }
+
+    .delta-neg {
+      background: rgba(252, 129, 129, .1);
+      color: var(--a5);
+      border: 1px solid rgba(252, 129, 129, .2)
+    }
+
+    .card-meta {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid var(--b)
+    }
+
+    .meta-chip {
+      font-size: .72rem;
+      color: var(--m);
+      display: flex;
+      align-items: center;
+      gap: 4px
+    }
+
+    .action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 18px 24px;
+      flex-shrink: 0
+    }
+
+    .act-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+      font-family: inherit
+    }
+
+    .btn-skip {
+      background: rgba(252, 129, 129, .12);
+      color: var(--a5);
+      border: 1.5px solid rgba(252, 129, 129, .3)
+    }
+
+    .btn-skip:hover {
+      background: rgba(252, 129, 129, .25);
+      transform: scale(1.1)
+    }
+
+    .btn-do {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+      color: #fff;
+      font-size: 1.6rem;
+      box-shadow: 0 6px 24px rgba(139, 92, 246, .45)
+    }
+
+    .btn-do:hover {
+      transform: scale(1.08);
+      box-shadow: 0 8px 32px rgba(139, 92, 246, .6)
+    }
+
+    .btn-done {
+      background: rgba(104, 211, 145, .12);
+      color: var(--a3);
+      border: 1.5px solid rgba(104, 211, 145, .3)
+    }
+
+    .btn-done:hover {
+      background: rgba(104, 211, 145, .25);
+      transform: scale(1.1)
+    }
+
+    .action-hint {
+      font-size: .7rem;
+      color: var(--m);
+      text-align: center;
+      margin-bottom: 4px
+    }
+
+    .nav-sidebar {
+      position: fixed;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 100
+    }
+
+    .nav-item {
+      width: 44px;
+      height: 44px;
+      background: rgba(255, 255, 255, .08);
+      backdrop-filter: blur(5px);
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, .12);
+      transition: .25s;
+      color: rgba(255, 255, 255, .6);
+      text-decoration: none;
+      font-size: 1.1rem
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: rgba(139, 92, 246, .3);
+      border-color: rgba(167, 139, 250, .5);
+      color: #fff
+    }
+
+    .user-row {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .user-row select {
+      background: var(--s1);
+      border: 1px solid var(--b);
+      color: var(--t);
+      border-radius: 10px;
+      padding: 5px 10px;
+      font-size: .8rem;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer
+    }
+
+    #loading {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(26, 26, 46, .92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      backdrop-filter: blur(6px)
+    }
+
+    #loading.hidden {
+      display: none
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid rgba(255, 255, 255, .15);
+      border-top-color: var(--a2);
+      border-radius: 50%;
+      animation: spin .7s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .load-txt {
+      font-size: .85rem;
+      color: var(--m)
+    }
+
+    #empty {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      height: 200px;
+      color: var(--m)
+    }
+
+    #empty.show {
+      display: flex
+    }
+
+    #empty .big {
+      font-size: 3rem
+    }
+
+    .counter-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 6px;
+      flex-shrink: 0
+    }
+
+    .counter-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .2);
+      transition: .3s
+    }
+
+    .counter-dot.active {
+      background: var(--a2)
+    }
+  </style>
+</head>
+
+<body>
+  <div class="orb o1"></div>
+  <div class="orb o2"></div>
+
+  <div id="loading">
+    <div class="spinner"></div>
+    <div class="load-txt">Finding what's best for you…</div>
+  </div>
+
+  <div class="shell">
+
+    <div class="topbar">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <a href="/" class="pill" style="text-decoration:none;">← Go Back</a>
+        <div class="logo">✨ For You</div>
+      </div>
+
+      <div class="topbar-right">
+
+        <div class="user-row">
+          <span style="font-size:.75rem;color:var(--m)">User</span>
+          <select id="user-sel" onchange="reload()">
+            <option>Loading…</option>
+          </select>
+        </div>
+        <div class="pill" onclick="reload()">↺ Refresh</div>
+      </div>
+    </div>
+
+    <div class="safety-banner" id="safety-banner">
+      <div class="safety-title">⚠️ We're here for you</div>
+      <p id="safety-msg"></p>
+      <div class="safety-links" id="safety-links"></div>
+    </div>
+
+    <div class="state-bar"><span class="icon">🧠</span><span id="state-text">Analysing your state…</span></div>
+
+    <div class="counter-row" id="counter-row"></div>
+
+    <div class="feed">
+      <div id="empty">
+        <div class="big">🎉</div>
+        <div>All done! Refresh for more.</div><button class="pill" onclick="reload()" style="margin-top:8px">Get
+          more</button>
+      </div>
+      <div class="card-stack" id="card-stack"></div>
+    </div>
+
+    <div class="action-hint">← Skip &nbsp;|&nbsp; ✓ Done &nbsp;|&nbsp; → Navigate</div>
+    <div class="action-bar">
+      <button class="act-btn btn-skip" onclick="swipe('skip')" title="Skip">✕</button>
+      <button class="act-btn btn-do" onclick="navigate()" title="Open activity">→</button>
+      <button class="act-btn btn-done" onclick="swipe('complete')" title="Mark done">✓</button>
+    </div>
+  </div>
+
+  <script>
+    const DIM_NAMES = ["stress_level", "mood_level", "energy_level", "engagement_level", "motivation_level", "consistency_level"];
+
+    let recs = [];
+    let current = 0;
+    let userVec = null;
+    let userId = "";
+    let dragging = false;
+    let dragStartX = 0;
+
+    async function init() {
+      await loadUsers();
+      await reload();
+    }
+
+    async function loadUsers() {
+      try {
+        const res = await fetch("/api/all_user_ids");
+        const data = await res.json();
+        const sel = document.getElementById("user-sel");
+        sel.innerHTML = "";
+        (data.user_ids || []).forEach(uid => {
+          const o = document.createElement("option");
+          o.value = uid; o.textContent = uid; sel.appendChild(o);
+        });
+        userId = sel.value;
+      } catch (e) { console.error(e); }
+    }
+
+    async function reload() {
+      userId = document.getElementById("user-sel").value;
+      document.getElementById("loading").classList.remove("hidden");
+      document.getElementById("empty").classList.remove("show");
+      document.getElementById("card-stack").innerHTML = "";
+      current = 0;
+
+      try {
+        const res = await fetch(`/api/recommendations?user_id=${encodeURIComponent(userId)}&top_k=5&window_days=365`);
+        const data = await res.json();
+
+        const sb = document.getElementById("safety-banner");
+        if (data.safety_alert?.triggered) {
+          document.getElementById("safety-msg").textContent = data.safety_alert.message;
+          const sl = document.getElementById("safety-links");
+          sl.innerHTML = "";
+          (data.safety_alert.resources || []).forEach(r => {
+            sl.innerHTML += `<a class="safety-link" href="${r.url}">${r.name}</a>`;
+          });
+          sb.style.display = "block";
+        } else { sb.style.display = "none"; }
+
+        document.getElementById("state-text").textContent = data.state_summary || "";
+
+        recs = data.recommendations || [];
+        userVec = data.user_vector || null;
+        buildDots();
+        renderCards();
+      } catch (e) {
+        console.error(e);
+        document.getElementById("state-text").textContent = "Could not load recommendations.";
+      } finally {
+        document.getElementById("loading").classList.add("hidden");
+      }
+    }
+
+    function buildDots() {
+      const row = document.getElementById("counter-row");
+      row.innerHTML = "";
+      recs.forEach((_, i) => {
+        const d = document.createElement("div");
+        d.className = "counter-dot" + (i === 0 ? " active" : "");
+        d.id = `dot-${i}`;
+        row.appendChild(d);
+      });
+    }
+    function updateDots() {
+      recs.forEach((_, i) => {
+        const d = document.getElementById(`dot-${i}`);
+        if (d) d.className = "counter-dot" + (i === current ? " active" : "");
+      });
+    }
+
+    function renderCards() {
+      const stack = document.getElementById("card-stack");
+      stack.innerHTML = "";
+      if (!recs.length) { showEmpty(); return; }
+
+      for (let i = Math.min(current + 2, recs.length - 1); i >= current; i--) {
+        const card = buildCard(recs[i], i);
+        const diff = i - current;
+        if (diff === 0) card.classList.add("front");
+        else if (diff === 1) card.classList.add("behind1");
+        else card.classList.add("behind2");
+        stack.appendChild(card);
+      }
+      setupDrag();
+    }
+
+    function buildCard(rec, idx) {
+      const el = document.createElement("div");
+      el.className = "rec-card";
+      el.id = `card-${idx}`;
+
+      let deltaHTML = "";
+      const deltas = rec.future_state?.deltas || {};
+      Object.entries(deltas).forEach(([k, v]) => {
+        const label = k.replace("_level", "").replace("_", " ");
+        const cls = v > 0 ? "delta-pos" : "delta-neg";
+        const sign = v > 0 ? "↑" : "↓";
+        deltaHTML += `<div class="delta-chip ${cls}">${sign} ${label} ${Math.abs(v * 100).toFixed(0)}%</div>`;
+      });
+
+      const pct = Math.round((rec.score || 0) * 100);
+      const tags = (rec.tags || []).slice(0, 3).join(" · ");
+
+      el.innerHTML = `
+    <div class="card-top">
+      <div class="card-emoji">${rec.emoji}</div>
+      <div class="score-badge">Match ${pct}%</div>
+    </div>
+    <div class="card-name">${rec.name}</div>
+    <div class="card-desc">${rec.description}</div>
+    <div class="why-box">
+      <div class="why-label">💡 Why this?</div>
+      <div class="why-text">${rec.why}</div>
+    </div>
+    ${deltaHTML ? `<div class="future-row">${deltaHTML}</div>` : ""}
+    <div class="card-meta">
+      <div class="meta-chip">⏱ ${rec.duration_min} min</div>
+      <div class="meta-chip">⚡ Effort ${"●".repeat(rec.effort || 1)}${"○".repeat(3 - (rec.effort || 1))}</div>
+      <div class="meta-chip" style="margin-left:auto;font-size:.65rem;color:var(--m)">${tags}</div>
+    </div>`;
+      return el;
+    }
+
+    function swipe(feedback) {
+      if (current >= recs.length) return;
+      const rec = recs[current];
+      const card = document.getElementById(`card-${current}`);
+      if (!card) return;
+
+      card.classList.add(feedback === "complete" ? "swiped-right" : "swiped-left");
+
+      fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: userId,
+          activity_id: rec.id,
+          feedback,
+          current_vector: userVec
+        })
+      }).then(r => r.json()).then(d => {
+        if (d.updated_vector) userVec = d.updated_vector;
+      }).catch(console.error);
+
+      setTimeout(() => {
+        current++;
+        if (current >= recs.length) { showEmpty(); return; }
+        updateDots();
+        renderCards();
+      }, 380);
+    }
+
+    function navigate() {
+      if (current >= recs.length) return;
+      const rec = recs[current];
+      window.location.href = rec.page || "/activities";
+    }
+
+    function showEmpty() {
+      document.getElementById("card-stack").innerHTML = "";
+      document.getElementById("empty").classList.add("show");
+    }
+
+    function setupDrag() {
+      const card = document.querySelector(".rec-card.front");
+      if (!card) return;
+
+      const onDown = e => { dragging = true; dragStartX = (e.touches ? e.touches[0].clientX : e.clientX); card.style.transition = "none"; };
+      const onMove = e => {
+        if (!dragging) return;
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - dragStartX;
+        const rot = x * 0.08;
+        card.style.transform = `translateX(${x}px) rotate(${rot}deg)`;
+      };
+      const onUp = e => {
+        if (!dragging) return;
+        dragging = false;
+        card.style.transition = "";
+        const x = (e.changedTouches ? e.changedTouches[0].clientX : e.clientX) - dragStartX;
+        if (x > 80) swipe("complete");
+        else if (x < -80) swipe("skip");
+        else card.style.transform = "";
+      };
+
+      card.addEventListener("mousedown", onDown);
+      card.addEventListener("touchstart", onDown);
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("touchmove", onMove, { passive: true });
+      document.addEventListener("mouseup", onUp);
+      document.addEventListener("touchend", onUp);
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft") swipe("skip");
+      if (e.key === "ArrowRight") swipe("complete");
+      if (e.key === "Enter") navigate();
+    });
+
+    init();
+  </script>
+</body>
+
+</html>

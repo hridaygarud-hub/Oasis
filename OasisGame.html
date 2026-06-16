@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Scratch Game</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#8b5cf6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spline-bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        .spline-bg-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            z-index: 1;
+        }
+
+        .card h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .game-container {
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        iframe {
+            display: block;
+        }
+
+        .go-back-button {
+            margin-top: 32px;
+            text-decoration: none;
+        }
+
+        .go-back-button button {
+            background: linear-gradient(45deg, #a855f7, #6b46c1);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .go-back-button button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(45deg, #9333ea, #5a32a3);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="spline-bg-container">
+        <iframe src='https://my.spline.design/ailandingpagewebdesign3danimation-8hFNuj0gbBXM1uPdCf3aRUnZ/'
+            frameborder='0' width='100%' height='100%'></iframe>
+    </div>
+    <div class="card">
+        <h1>Your Game For The Day</h1>
+        <div class="game-container">
+            <iframe src="https://scratch.mit.edu/projects/1228169910/embed" allowtransparency="true" width="485"
+                height="402" frameborder="0" scrolling="no" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <a href="#" onclick="track('home','/'); return false;"
+        class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-colors duration-300">
+        Go Back
+    </a>
+
+    <script src="/track.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker registered', (typeof reg !== 'undefined' ? reg : 'unknown')))
+                    .catch(err => console.log('Service Worker registration failed', err));
+            });
+        }
+    </script>
+</body>
+
+</html>

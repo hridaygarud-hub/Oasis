@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Journal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#8b5cf6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .spline-bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        .spline-bg-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            color: #ccc;
+        }
+
+        .header-left .back-arrow {
+            font-size: 24px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header-title .book-icon {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+
+        .new-entry-btn {
+            background-color: #ff6347;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .new-entry-btn:hover {
+            background-color: #e5533d;
+        }
+
+        .new-entry-btn .plus-icon {
+            font-size: 20px;
+            margin-right: 5px;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            background-color: #3b3a5b;
+            border: none;
+            border-radius: 20px;
+            padding: 15px 20px;
+            color: #ccc;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .search-input::placeholder {
+            color: #888;
+        }
+
+        .moods-dropdown {
+            background-color: #3b3a5b;
+            border: none;
+            border-radius: 20px;
+            padding: 15px 20px;
+            color: #ccc;
+            font-size: 16px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"%3e%3cpolyline points="6 9 12 15 18 9"%3e%3c/polyline%3e%3c/svg%3e');
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 1em;
+            cursor: pointer;
+        }
+
+        #newEntryForm {
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+            background-color: #2a2a47;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        #newEntryForm input,
+        #newEntryForm textarea,
+        #newEntryForm select {
+            background-color: #3b3a5b;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            color: #fff;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        #newEntryForm textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        #newEntryForm button {
+            background-color: #ff6347;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #newEntryForm button:hover {
+            background-color: #e5533d;
+        }
+
+        .entry {
+            background-color: #2a2a47;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .entry-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .entry-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-right: auto;
+        }
+
+        .entry-meta {
+            display: flex;
+            align-items: center;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .entry-date {
+            margin-right: 10px;
+        }
+
+        .entry-mood {
+            display: flex;
+            align-items: center;
+        }
+
+        .entry-mood .mood-emoji {
+            font-size: 20px;
+            margin-right: 5px;
+        }
+
+        .entry-body {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .entry-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            background-color: #4a4a6b;
+            color: #d1d1e0;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .icon {
+            font-family: 'Inter', sans-serif;
+            font-size: 1em;
+            font-style: normal;
+        }
+
+        .icon.book:before {
+            content: '\1F4D6';
+        }
+
+        .icon.plus:before {
+            content: '+';
+        }
+
+        .icon.search:before {
+            content: '\1F50D';
+        }
+
+        .icon.arrow-left:before {
+            content: '\2190';
+        }
+
+        .icon.mood-happy:before {
+            content: '\1F60A';
+        }
+
+        .icon.mood-neutral:before {
+            content: '\1F610';
+        }
+
+        .icon.mood-sad:before {
+            content: '\1F622';
+        }
+
+        .go-back-btn {
+            background-color: #6a0dad;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .go-back-btn:hover {
+            background-color: #8a2be2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="spline-bg-container">
+        <iframe src='https://my.spline.design/ailandingpagewebdesign3danimation-8hFNuj0gbBXM1uPdCf3aRUnZ/'
+            frameborder='0' width='100%' height='100%'></iframe>
+    </div>
+    <div class="container">
+        <header class="header">
+
+            <div class="header-title">
+                <span class="icon book"></span>
+                Your Journal
+            </div>
+            <button class="new-entry-btn" id="newEntryButton">
+                <span class="icon plus"></span>
+                New Entry
+            </button>
+        </header>
+
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search entries...">
+            <select class="moods-dropdown">
+                <option>All Moods</option>
+                <option value="happy">Happy</option>
+                <option value="neutral">Neutral</option>
+                <option value="sad">Sad</option>
+            </select>
+        </div>
+
+        <form id="newEntryForm">
+            <input type="text" id="entryTitle" placeholder="Title">
+            <textarea id="entryBody" placeholder="What's on your mind?"></textarea>
+            <input type="text" id="entryTags" placeholder="Tags (e.g., #school #work)">
+            <select id="entryMood">
+                <option value="happy">Happy 😊</option>
+                <option value="neutral">Neutral 😐</option>
+                <option value="sad">Sad 😞</option>
+            </select>
+            <button type="submit">Save Entry</button>
+        </form>
+
+        <div class="journal-entries" id="journalEntries">
+        </div>
+
+        <a href="#" onclick="track('home','/'); return false;"
+            class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition-colors duration-300">
+            Go Back
+        </a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const newEntryButton = document.getElementById('newEntryButton');
+            const newEntryForm = document.getElementById('newEntryForm');
+            const journalEntriesContainer = document.getElementById('journalEntries');
+            const goBackButton = document.getElementById('goBackButton');
+
+            const moodEmojis = {
+                happy: '😊',
+                neutral: '😐',
+                sad: '😞'
+            };
+
+            loadEntries();
+
+            newEntryButton.addEventListener('click', () => {
+                newEntryForm.style.display = newEntryForm.style.display === 'flex' ? 'none' : 'flex';
+            });
+
+            newEntryForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const title = document.getElementById('entryTitle').value;
+                const body = document.getElementById('entryBody').value;
+                const tags = document.getElementById('entryTags').value.split(' ').filter(tag => tag.startsWith('#'));
+
+                if (!title || !body) return;
+
+                const response = await fetch("/detect_emotion", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ text: body })
+                });
+
+                const data = await response.json();
+                let detectedEmotion = data.emotion || "neutral";
+
+                console.log("Detected Emotion:", detectedEmotion);
+
+                let mood;
+                if (["joy", "love", "surprise"].includes(detectedEmotion)) mood = "happy";
+                else if (["sadness", "anger", "fear"].includes(detectedEmotion)) mood = "sad";
+                else mood = "neutral";
+
+                const date = new Date().toLocaleDateString('en-US', {
+                    year: 'numeric', month: '2-digit', day: '2-digit'
+                });
+
+                const newEntry = { title, body, tags, mood, date };
+
+                saveEntry(newEntry);
+                renderEntry(newEntry);
+
+                localStorage.setItem("lastEmotion", detectedEmotion);
+
+                try {
+                    await fetch("/track", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            user_id: user_id,
+                            event_type: "emotion_detected",
+                            item_id: "/journal",
+                            duration: "",
+                            emotion: detectedEmotion
+                        })
+                    });
+                } catch (e) {
+                    console.error("Tracking error:", e);
+                }
+
+                newEntryForm.reset();
+                newEntryForm.style.display = 'none';
+            });
+
+            goBackButton.addEventListener('click', () => {
+                window.location.href = 'Oasis.html';
+            });
+
+            function saveEntry(entry) {
+                let entries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+                entries.push(entry);
+                localStorage.setItem('journalEntries', JSON.stringify(entries));
+            }
+
+            function loadEntries() {
+                const entries = JSON.parse(localStorage.getItem('journalEntries')) || [];
+                entries.forEach(entry => renderEntry(entry, true));
+            }
+
+            function renderEntry(entry, isInitialLoad = false) {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'entry';
+
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'entry-header';
+
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'entry-title';
+                titleDiv.textContent = entry.title;
+
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'entry-meta';
+
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'entry-date';
+                dateSpan.textContent = entry.date;
+
+                const moodDiv = document.createElement('div');
+                moodDiv.className = 'entry-mood';
+                moodDiv.innerHTML = `<span class="mood-emoji">${moodEmojis[entry.mood]}</span><span>${entry.mood}</span>`;
+
+                metaDiv.appendChild(dateSpan);
+                metaDiv.appendChild(moodDiv);
+                headerDiv.appendChild(titleDiv);
+                headerDiv.appendChild(metaDiv);
+
+                const bodyDiv = document.createElement('div');
+                bodyDiv.className = 'entry-body';
+                bodyDiv.textContent = entry.body;
+
+                const tagsDiv = document.createElement('div');
+                tagsDiv.className = 'entry-tags';
+                entry.tags.forEach(tag => {
+                    const tagSpan = document.createElement('span');
+                    tagSpan.className = 'tag';
+                    tagSpan.textContent = tag;
+                    tagsDiv.appendChild(tagSpan);
+                });
+
+                entryDiv.appendChild(headerDiv);
+                entryDiv.appendChild(bodyDiv);
+                entryDiv.appendChild(tagsDiv);
+
+                if (isInitialLoad) {
+                    journalEntriesContainer.appendChild(entryDiv);
+                } else {
+                    journalEntriesContainer.prepend(entryDiv);
+                }
+            }
+        });
+    </script>
+
+    <script src="/track.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker registered', (typeof reg !== 'undefined' ? reg : 'unknown')))
+                    .catch(err => console.log('Service Worker registration failed', err));
+            });
+        }
+    </script>
+</body>
+
+</html>
